@@ -21,7 +21,7 @@ def get_filters():
     # TO DO: get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
     
     cities = ['chicago', 'new_york_city', 'washington']
-    months = ['all', 'january', 'february', 'march','april','may' , 'june','july','august','september','october','december']
+    months = ['all', 'january', 'february', 'march','april','may' , 'june','july','august','september','october','november','december']
     days = ['all','saturday','friday','monday','sunday','tuesday','wednesday','thursday']
     
     while(True):
@@ -85,7 +85,6 @@ def get_filters():
 
 ############################  DONE  #################################
 
-
 def load_data(city, month, day):
     """
     Loads data for the specified city and filters by month and day if applicable.
@@ -113,10 +112,17 @@ def load_data(city, month, day):
     
     #Filtering for month
     if month != 'all':
-        df_temp = df_temp[df_temp['month_name'] == month]
+        if (df_temp['month_name'] == month).sum() == 0:
+            print('There is no data for the month {} in this city, So we will view all months'.format(month))
+        else:
+            df_temp = df_temp[df_temp['month_name'] == month]
+                  
         
     if day != 'all':
-        df_temp = df_temp[df_temp['day_name'] == day]
+        if (df_temp['day_name'] == day).sum() == 0:
+            print('There is no data for the day {} in this city, So we will view all days'.format(day))
+        else:
+            df_temp = df_temp[df_temp['day_name'] == day]
     
                                                                
     #Dropping added columns
@@ -125,30 +131,31 @@ def load_data(city, month, day):
     #return
     return df
 
+############################  DONE  #################################
 
 def time_stats(df):
     """Displays statistics on the most frequent times of travel."""
+    if 'Start Time' in df.columns:
+        print('\nCalculating The Most Frequent Times of Travel...\n')
+        start_time = time.time()
 
-    print('\nCalculating The Most Frequent Times of Travel...\n')
-    start_time = time.time()
-    
-    df['Start Time'] = pd.to_datetime(df['Start Time'])
-    # TO DO: display the most common month
-    df['month'] = df['Start Time'].dt.month_name()
-    print('Most common month is {}'.format(df['month'].mode()[0]))
+        df['Start Time'] = pd.to_datetime(df['Start Time'])
+        # TO DO: display the most common month
+        df['month'] = df['Start Time'].dt.month_name()
+        print('Most common month is {}'.format(df['month'].mode()[0]))
 
-    # TO DO: display the most common day of week
-    df['day'] = df['Start Time'].dt.day_name()
-    print('Most common day is {}'.format(df['day'].mode()[0]))
+        # TO DO: display the most common day of week
+        df['day'] = df['Start Time'].dt.day_name()
+        print('Most common day is {}'.format(df['day'].mode()[0]))
 
-    # TO DO: display the most common start hour
-    df['st_hour'] = df['Start Time'].dt.hour
-    print('Most common start hour is {}'.format(df['st_hour'].mode()[0]))
+        # TO DO: display the most common start hour
+        df['st_hour'] = df['Start Time'].dt.hour
+        print('Most common start hour is {}'.format(df['st_hour'].mode()[0]))
 
-    print("\nThis took %s seconds." % (time.time() - start_time))
+        print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
-
+#########################################################################################
 def station_stats(df):
     """Displays statistics on the most popular stations and trip."""
 
@@ -156,33 +163,36 @@ def station_stats(df):
     start_time = time.time()
 
     # TO DO: display most commonly used start station
-    print('The Most Commonly Used Start Station is {}'.format(df['Start Station'].mode().loc[0]))
+    if 'Start Station' in df.columns:
+        print('The Most Commonly Used Start Station is {}'.format(df['Start Station'].mode().loc[0]))
 
     # TO DO: display most commonly used end station
-    print('The Most Commonly Used End Station is {}'.format(df['End Station'].mode().loc[0]))
+    if 'End Station' in df.columns:
+        print('The Most Commonly Used End Station is {}'.format(df['End Station'].mode().loc[0]))
 
     # TO DO: display most frequent combination of start station and end station trip
-    t = df[['Start Station', 'End Station']].mode().loc[0]
-    print('The Most Commonly combination of start station and end station trip {} , {}'.format(t[0],t[1]))
+    if 'Start Station' and 'End Station' in df.columns:
+        t = df[['Start Station', 'End Station']].mode().loc[0]
+        print('The Most Commonly combination of start station and end station trip {} , {}'.format(t[0],t[1]))
           
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
-
+###############################################################################
 def trip_duration_stats(df):
     """Displays statistics on the total and average trip duration."""
+    if 'Trip Duration' in df.columns:
+        print('\nCalculating Trip Duration...\n')
+        start_time = time.time()
 
-    print('\nCalculating Trip Duration...\n')
-    start_time = time.time()
+        # TO DO: display total travel time
+        print('Total travel time is {}'.format(df['Trip Duration'].sum()))
 
-    # TO DO: display total travel time
-    print('Total travel time is {}'.format(df['Trip Duration'].sum()))
+        # TO DO: display mean travel time
+        print('Avg travel time is {}'.format(df['Trip Duration'].mean()))
 
-    # TO DO: display mean travel time
-    print('Avg travel time is {}'.format(df['Trip Duration'].mean()))
-    
 
-    print("\nThis took %s seconds." % (time.time() - start_time))
+        print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
 
@@ -193,36 +203,55 @@ def user_stats(df):
     start_time = time.time()
 
     # TO DO: Display counts of user types
-    print('Count of user types: ')
-    print(df['User Type'].value_counts())
+    if "User Type" in df.columns:
+        print('Count of user types: ')
+        print(df['User Type'].value_counts())
 
     # TO DO: Display counts of gender
-    print('Count of genders: ')
-    print(df['Gender'].value_counts())
+    if 'Gender' in df.columns:
+        print('Count of genders: ')
+        print(df['Gender'].value_counts())
 
     # TO DO: Display earliest, most recent, and most common year of birth
-
-    print('Earliest year is {}'.format(df['Birth Year'].min()))
-    print('Most recent year is {}'.format(df['Birth Year'].max()))
-    print('Most common year of birth is {}'.format(df['Birth Year'].mode()[0]))
-    
-          
-
+    if 'Birth Year' in df.columns:
+        print('Earliest year is {}'.format(df['Birth Year'].min()))
+        print('Most recent year is {}'.format(df['Birth Year'].max()))
+        print('Most common year of birth is {}'.format(df['Birth Year'].mode()[0]))
 
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
     
+    
+#Function that views a sample of data for the user   
 def show_data(df):
     counter = 0
+    df_len = df.shape[0]
+    
     while True:
-        ans = input('Do you want to review some of the data? [y/n]')
-        if ans.lower() == 'yes' or ans.lower() == 'y':
-            df_subset = df[counter:counter+5]
-            print(df_subset)
-            counter+= 5
-        else:
-            print('-'*40)
-            break
+        try:
+            ans = input('Do you want to review some of the data? [y/n]')
+            #Checking the answer
+            if ans.lower() == 'yes' or ans.lower() == 'y':
+                #answer is yes
+                #so we check if we have data to review
+                if counter + 5 <= df_len:
+                    df_subset = df.iloc[counter:counter+5]
+                    print(df_subset)
+                    counter+= 5
+                else:
+                    df_subset = df.iloc[counter:]
+                    if df_subet.empty: print('No more data')
+                    else:
+                        print(df_subset)
+                    print('Finished Viewing all of the data!!')
+                    print('-'*40)
+                    break
+            #answered no
+            else:
+                print('-'*40)
+                break
+        except:
+            print('You answered wrong')
 
 
 def main():
